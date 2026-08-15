@@ -30,8 +30,6 @@ const ProjectsShowcase = ({ onModalChange }) => {
   };
 
   const categories = ['All', 'Clinical AI', 'Few-Shot Learning', 'Generative AI', 'Blockchain', 'Systems & Networks', 'Computer Vision'];
-  // Create a massive array (100 copies) to simulate infinite scroll flawlessly
-  const infiniteCategories = Array(100).fill(categories).flat();
 
   React.useEffect(() => {
     if (onModalChange) {
@@ -49,74 +47,22 @@ const ProjectsShowcase = ({ onModalChange }) => {
         width: activeTab.offsetWidth,
         opacity: 1
       });
+      
+      // On mobile, if active filter changes programmatically or on mount, smoothly scroll it into view
+      if (window.innerWidth <= 768 && containerRef.current) {
+        const container = containerRef.current;
+        const containerCenter = container.offsetWidth / 2;
+        const buttonCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
+        
+        setTimeout(() => {
+          container.scrollTo({
+            left: buttonCenter - containerCenter,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
     }
   }, [activeFilter, categories]);
-
-  // Mobile scroll tracking for Infinite Picker Wheel effect
-  const lastVibratedIdx = React.useRef(-1);
-
-  React.useEffect(() => {
-    if (window.innerWidth > 768) return;
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Center the initial view on the exact middle of the massive array
-    if (!scrollInitRef.current) {
-      // Delay slightly to ensure DOM is fully painted so offsetLeft is correct
-      setTimeout(() => {
-        const middleCopyIdx = Math.floor(infiniteCategories.length / 2);
-        const startIdx = middleCopyIdx - (middleCopyIdx % categories.length); 
-        const targetBtn = tabsRef.current[startIdx];
-        
-        if (targetBtn) {
-          const containerCenter = container.offsetWidth / 2;
-          const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
-          container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
-          scrollInitRef.current = true;
-        }
-      }, 100);
-    }
-
-    const handleScroll = () => {
-      const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
-      let closestIdx = -1;
-      let minDistance = Infinity;
-
-      tabsRef.current.forEach((el, idx) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.left + rect.width / 2;
-        const distance = Math.abs(containerCenter - elCenter);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIdx = idx;
-        }
-      });
-
-      if (closestIdx !== -1 && closestIdx !== lastVibratedIdx.current) {
-        lastVibratedIdx.current = closestIdx;
-        if (navigator.vibrate) {
-          navigator.vibrate(10);
-        }
-      }
-
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      
-      scrollTimeoutRef.current = setTimeout(() => {
-        if (closestIdx !== -1) {
-          const cat = infiniteCategories[closestIdx];
-          setActiveFilter(prev => {
-            if (prev !== cat) return cat;
-            return prev;
-          });
-        }
-      }, 60); // Debounce
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []); // Run once to attach listener
 
   const projects = [
     {
@@ -291,13 +237,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
         </div>
 
         {/* iOS-Style Segmented Control Filter Bar */}
-        <div className="segmented-wrapper" style={{ position: 'relative' }}>
-          {/* Mobile Fixed Center Bubble */}
-          <div 
-            className="mobile-fixed-bubble" 
-            style={{ width: `${sliderStyle.width}px` }} 
-          />
-
+        <div className="segmented-wrapper">
           <div className="segmented-control-container" ref={containerRef}>
             <div className="segmented-control" style={{ position: 'relative' }}>
               <div 
@@ -320,29 +260,16 @@ const ProjectsShowcase = ({ onModalChange }) => {
                   zIndex: 1
                 }}
               />
-              {infiniteCategories.map((cat, idx) => (
+              {categories.map((cat, idx) => (
                 <button
-                  key={`${cat}-${idx}`}
+                  key={cat}
                   ref={el => tabsRef.current[idx] = el}
-                  onClick={(e) => {
-                    setActiveFilter(cat);
-                    if (window.innerWidth <= 768) {
-                      const container = containerRef.current;
-                      if (container) {
-                        const containerCenter = container.offsetWidth / 2;
-                        const buttonCenter = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
-                        container.scrollTo({
-                          left: buttonCenter - containerCenter,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }
-                  }}
-                  className={`segment-btn ${activeFilter === cat ? 'active' : ''} ${idx >= categories.length ? 'mobile-only-tab' : ''}`}
+                  onClick={() => setActiveFilter(cat)}
+                  className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
                   style={{ 
                     position: 'relative', 
-                    zIndex: activeFilter === cat ? 2 : 0,
-                    transition: 'color 0.8s ease'
+                    zIndex: 2,
+                    transition: 'color 0.5s ease'
                   }}
                 >
                   {cat}
@@ -757,16 +684,6 @@ const ProjectsShowcase = ({ onModalChange }) => {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        .mobile-fixed-bubble {
-          display: none;
-        }
-
-        @media (min-width: 769px) {
-          .mobile-only-tab {
-            display: none !important;
-          }
-        }
-
         @media (max-width: 768px) {
           .segmented-control-container {
             justify-content: flex-start;
@@ -775,13 +692,9 @@ const ProjectsShowcase = ({ onModalChange }) => {
             /* Allow scrolling edge-to-edge on iPhone */
             margin-left: -5%;
             margin-right: -5%;
-            /* Add enough padding so first and last items can reach the center */
-            padding-left: calc(50vw - 40px);
-            padding-right: calc(50vw - 40px);
-            padding-bottom: 1rem;
-            scroll-snap-type: x mandatory;
-            position: relative;
-            z-index: 2; /* Forces text to render completely ON TOP of the fixed bubble so it isn't blurred! */
+            padding-left: 5%;
+            padding-right: 5%;
+            padding-bottom: 0.5rem;
           }
           
           .segmented-control-container::-webkit-scrollbar {
@@ -791,35 +704,6 @@ const ProjectsShowcase = ({ onModalChange }) => {
           .segmented-control {
             flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
             white-space: nowrap;
-            background: transparent !important; /* Removes track background */
-            border: none !important;
-          }
-
-          .segment-btn {
-            scroll-snap-align: center;
-          }
-
-          .desktop-slider-bubble {
-            display: none; /* Hide desktop sliding bubble */
-          }
-
-          .mobile-fixed-bubble {
-            display: block;
-            position: absolute;
-            top: 4px;
-            height: calc(100% - 24px); /* Account for padding-bottom */
-            left: 50%;
-            transform: translateX(-50%);
-            /* Copy the beautiful glass style */
-            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%);
-            backdrop-filter: blur(30px) saturate(250%);
-            -webkit-backdrop-filter: blur(30px) saturate(250%);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2);
-            border-radius: 9999px;
-            pointer-events: none;
-            transition: width 0.3s ease;
-            z-index: 1; /* Sits UNDER the text container */
           }
         }
       `}</style>
