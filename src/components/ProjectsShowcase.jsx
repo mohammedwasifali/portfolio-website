@@ -426,7 +426,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
         }
 
         .project-card {
-          background: var(--card-bg);
+          background: var(--bg-card);
           border: 1px solid var(--border-glass);
           border-radius: 24px;
           padding: 2rem;
@@ -682,6 +682,26 @@ const ProjectsShowcase = ({ onModalChange }) => {
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes modalFadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+
+        @keyframes modalZoomIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes modalZoomOut {
+          from { opacity: 1; transform: scale(1); }
+          to { opacity: 0; transform: scale(0.95); }
         }
 
         @media (max-width: 768px) {
