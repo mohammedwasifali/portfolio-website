@@ -23,6 +23,13 @@ const ContactSection = () => {
     if (!formData.email || !formData.message) return;
 
     setIsSubmitting(true);
+    
+    // Construct mailto link with the form data
+    const mailtoLink = `mailto:mdwali0912@gmail.com?subject=${encodeURIComponent(formData.subject || 'New Contact Form Submission')}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`)}`;
+    
+    // Trigger the email client
+    window.location.href = mailtoLink;
+
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
