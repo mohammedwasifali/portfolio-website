@@ -109,25 +109,35 @@ const StickyNav = ({ onOpenResume, isHidden }) => {
           align-items: center;
           gap: 0.6rem;
           padding: 0.85rem 1.5rem;
-          background: rgba(255, 255, 255, 0.35);
-          backdrop-filter: blur(40px) saturate(200%);
-          -webkit-backdrop-filter: blur(40px) saturate(200%);
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-          border-radius: 9999px;
+          /* Shiny 3D bubble background */
+          background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.15) 100%);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          /* Bubble edges */
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+          border-right: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 9999px; /* Pill/Bubble shape */
           color: var(--text-main);
           font-weight: 500;
           font-size: 0.95rem;
           text-decoration: none;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          /* Glossy inner highlights and soft drop shadow */
+          box-shadow: 
+            0 10px 30px rgba(0,0,0,0.05), 
+            inset 0 4px 8px rgba(255, 255, 255, 1), 
+            inset 0 -4px 8px rgba(255, 255, 255, 0.2);
         }
 
         .hero-nav-tab:hover {
-          background: rgba(255, 255, 255, 0.55);
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 12px 40px rgba(0,0,0,0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+          background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.25) 100%);
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 
+            0 15px 35px rgba(0,0,0,0.1), 
+            inset 0 6px 10px rgba(255, 255, 255, 1), 
+            inset 0 -4px 8px rgba(255, 255, 255, 0.4);
           color: var(--accent-apple-blue);
         }
         
