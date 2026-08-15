@@ -16,6 +16,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [modalOrigin, setModalOrigin] = useState({ x: 0, y: 0 });
   const tabsRef = React.useRef([]);
+  const containerRef = React.useRef(null);
+  const scrollTimeoutRef = React.useRef(null);
   
   const handleClose = () => {
     setIsClosing(true);
@@ -43,6 +45,42 @@ const ProjectsShowcase = ({ onModalChange }) => {
         opacity: 1
       });
     }
+  }, [activeFilter, categories]);
+
+  // Mobile scroll tracking for Picker Wheel effect
+  React.useEffect(() => {
+    if (window.innerWidth > 768) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      
+      scrollTimeoutRef.current = setTimeout(() => {
+        const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
+        let closestCat = null;
+        let minDistance = Infinity;
+
+        tabsRef.current.forEach((el, idx) => {
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          const elCenter = rect.left + rect.width / 2;
+          const distance = Math.abs(containerCenter - elCenter);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestCat = categories[idx];
+          }
+        });
+
+        if (closestCat && closestCat !== activeFilter) {
+          setActiveFilter(closestCat);
+        }
+      }, 50); // Debounce
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
   }, [activeFilter, categories]);
 
   const projects = [
@@ -218,56 +256,63 @@ const ProjectsShowcase = ({ onModalChange }) => {
         </div>
 
         {/* iOS-Style Segmented Control Filter Bar */}
-        <div className="segmented-control-container">
-          <div className="segmented-control" style={{ position: 'relative' }}>
-            <div 
-              className="mobile-slider-bubble"
-              style={{
-                position: 'absolute',
-                top: '4px',
-                height: 'calc(100% - 8px)',
-                left: `${sliderStyle.left}px`,
-                width: `${sliderStyle.width}px`,
-                opacity: sliderStyle.opacity,
-                transition: 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
-                borderRadius: '9999px',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)',
-                backdropFilter: 'blur(30px) saturate(250%)',
-                WebkitBackdropFilter: 'blur(30px) saturate(250%)',
-                border: '1px solid rgba(255, 255, 255, 0.6)',
-                boxShadow: 'inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2)',
-                zIndex: 1
-              }}
-            />
-            {categories.map((cat, idx) => (
-              <button
-                key={cat}
-                ref={el => tabsRef.current[idx] = el}
-                onClick={(e) => {
-                  setActiveFilter(cat);
-                  // On mobile, automatically slide the strip so the selected bubble is in the center
-                  if (window.innerWidth <= 768) {
-                    const container = e.currentTarget.closest('.segmented-control-container');
-                    if (container) {
-                      const containerCenter = container.offsetWidth / 2;
-                      const buttonCenter = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
-                      container.scrollTo({
-                        left: buttonCenter - containerCenter,
-                        behavior: 'smooth'
-                      });
+        <div className="segmented-wrapper" style={{ position: 'relative' }}>
+          {/* Mobile Fixed Center Bubble */}
+          <div 
+            className="mobile-fixed-bubble" 
+            style={{ width: `${sliderStyle.width}px` }} 
+          />
+
+          <div className="segmented-control-container" ref={containerRef}>
+            <div className="segmented-control" style={{ position: 'relative' }}>
+              <div 
+                className="desktop-slider-bubble"
+                style={{
+                  position: 'absolute',
+                  top: '4px',
+                  height: 'calc(100% - 8px)',
+                  left: `${sliderStyle.left}px`,
+                  width: `${sliderStyle.width}px`,
+                  opacity: sliderStyle.opacity,
+                  transition: 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+                  borderRadius: '9999px',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)',
+                  backdropFilter: 'blur(30px) saturate(250%)',
+                  WebkitBackdropFilter: 'blur(30px) saturate(250%)',
+                  border: '1px solid rgba(255, 255, 255, 0.6)',
+                  boxShadow: 'inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2)',
+                  zIndex: 1
+                }}
+              />
+              {categories.map((cat, idx) => (
+                <button
+                  key={cat}
+                  ref={el => tabsRef.current[idx] = el}
+                  onClick={(e) => {
+                    setActiveFilter(cat);
+                    if (window.innerWidth <= 768) {
+                      const container = containerRef.current;
+                      if (container) {
+                        const containerCenter = container.offsetWidth / 2;
+                        const buttonCenter = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
+                        container.scrollTo({
+                          left: buttonCenter - containerCenter,
+                          behavior: 'smooth'
+                        });
+                      }
                     }
-                  }
-                }}
-                className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
-                style={{ 
-                  position: 'relative', 
-                  zIndex: activeFilter === cat ? 2 : 0,
-                  transition: 'color 0.8s ease'
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+                  }}
+                  className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
+                  style={{ 
+                    position: 'relative', 
+                    zIndex: activeFilter === cat ? 2 : 0,
+                    transition: 'color 0.8s ease'
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -480,6 +525,10 @@ const ProjectsShowcase = ({ onModalChange }) => {
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
 
+        .mobile-fixed-bubble {
+          display: none;
+        }
+
         @media (max-width: 768px) {
           .segmented-control-container {
             justify-content: flex-start;
@@ -488,9 +537,11 @@ const ProjectsShowcase = ({ onModalChange }) => {
             /* Allow scrolling edge-to-edge on iPhone */
             margin-left: -5%;
             margin-right: -5%;
-            padding-left: 5%;
-            padding-right: 5%;
-            padding-bottom: 0.5rem;
+            /* Add enough padding so first and last items can reach the center */
+            padding-left: calc(50vw - 40px);
+            padding-right: calc(50vw - 40px);
+            padding-bottom: 1rem;
+            scroll-snap-type: x mandatory;
           }
           
           .segmented-control-container::-webkit-scrollbar {
@@ -500,6 +551,33 @@ const ProjectsShowcase = ({ onModalChange }) => {
           .segmented-control {
             flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
             white-space: nowrap;
+          }
+
+          .segment-btn {
+            scroll-snap-align: center;
+          }
+
+          .desktop-slider-bubble {
+            display: none; /* Hide desktop sliding bubble */
+          }
+
+          .mobile-fixed-bubble {
+            display: block;
+            position: absolute;
+            top: 4px;
+            height: calc(100% - 24px); /* Account for padding-bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            /* Copy the beautiful glass style */
+            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(30px) saturate(250%);
+            -webkit-backdrop-filter: blur(30px) saturate(250%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2);
+            border-radius: 9999px;
+            pointer-events: none;
+            transition: width 0.3s ease;
+            z-index: 1;
           }
         }
       `}</style>
