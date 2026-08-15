@@ -33,6 +33,15 @@ const Hero = ({ onOpenResume }) => {
             <p className="hero-apple-subtitle">
               CS student with hands-on experience in full-stack development, machine learning, and applied AI research. Built end-to-end systems using Python, PyTorch, FastAPI, React, and SQL across healthcare and social-impact projects, backed by peer-reviewed conference papers and a Best Paper Award.
             </p>
+            
+            <div className="hero-apple-actions">
+              <button onClick={onOpenResume} className="btn btn-primary glass-btn">
+                <span>View Full Resume</span>
+              </button>
+              <a href="#projects" className="btn btn-secondary glass-btn">
+                <span>Explore Work</span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -51,7 +60,7 @@ const Hero = ({ onOpenResume }) => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          width: 95%;
+          width: 92%;
           max-width: 1400px;
         }
 
@@ -207,9 +216,34 @@ const Hero = ({ onOpenResume }) => {
           font-weight: 400;
           max-width: 1000px;
         }
+        
+        .hero-apple-actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+          flex-wrap: wrap;
+        }
+        
+        .glass-btn {
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
 
         @media (max-width: 768px) {
+          .hero-apple-section {
+            padding-top: 6rem; /* Ensure space for navbar */
+          }
+          .hero-apple-container {
+            width: 90%; /* Much better margins on mobile */
+          }
+          .hero-card-top {
+            height: 180px; /* Reduce top height */
+          }
           .hero-photo-wrapper {
+            width: 150px; /* Smaller photo */
+            height: 150px;
+            bottom: -75px;
             left: 50%;
             transform: translateX(-50%);
           }
@@ -220,6 +254,9 @@ const Hero = ({ onOpenResume }) => {
           .hero-apple-title {
             font-size: 2.2rem;
             margin-top: 0.5rem;
+          }
+          .hero-apple-actions {
+            justify-content: center;
           }
           /* MASSIVE PERFORMANCE FIX FOR MOBILE */
           .mesh-blob {
