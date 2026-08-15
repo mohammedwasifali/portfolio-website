@@ -1425,9 +1425,20 @@ Error generating stack: `+i.message+`
             top: 0.5rem;
             margin-top: -1rem;
           }
+          .hero-nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            padding: 0 1rem;
+            width: 100%;
+          }
           .hero-nav-tab {
-            padding: 0.75rem 1.25rem;
-            font-size: 0.85rem;
+            padding: 0.75rem 0.2rem;
+            font-size: 0.75rem;
+            flex-direction: column;
+            gap: 0.4rem;
+            justify-content: center;
+            border-radius: 22px; /* iOS Squircle bubble */
           }
         }
       `})]})};function xp(){const[e,t]=R.useState(!1),[n,r]=R.useState(!1),l=e||n;return o.jsxs("div",{className:"app-main-wrapper",children:[o.jsx(Kf,{}),o.jsx("div",{className:"grid-overlay"}),o.jsxs("main",{children:[o.jsx(Yf,{onOpenResume:()=>t(!0)}),o.jsx(yp,{onOpenResume:()=>t(!0),isHidden:l}),o.jsx(cp,{onModalChange:r}),o.jsx(dp,{onModalChange:r}),o.jsx(fp,{}),o.jsx(pp,{}),o.jsx(hp,{})]}),o.jsx(gp,{}),e&&o.jsx(vp,{onClose:()=>t(!1)})]})}Zl.createRoot(document.getElementById("root")).render(o.jsx(it.StrictMode,{children:o.jsx(xp,{})}));

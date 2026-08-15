@@ -146,9 +146,20 @@ const StickyNav = ({ onOpenResume, isHidden }) => {
             top: 0.5rem;
             margin-top: -1rem;
           }
+          .hero-nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            padding: 0 1rem;
+            width: 100%;
+          }
           .hero-nav-tab {
-            padding: 0.75rem 1.25rem;
-            font-size: 0.85rem;
+            padding: 0.75rem 0.2rem;
+            font-size: 0.75rem;
+            flex-direction: column;
+            gap: 0.4rem;
+            justify-content: center;
+            border-radius: 22px; /* iOS Squircle bubble */
           }
         }
       `}</style>
