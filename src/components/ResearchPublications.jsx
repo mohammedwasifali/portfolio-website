@@ -484,12 +484,24 @@ const ResearchPublications = ({ onModalChange }) => {
           margin-top: 2rem;
           padding-top: 1.25rem;
           border-top: 1px solid var(--border-glass);
-          .btn { flex: 1; }
+        }
+
+        .modal-footer .btn {
+          flex: 1;
         }
 
         @media (max-width: 850px) {
           .featured-content { grid-template-columns: 1fr; }
           .featured-action-box { padding-left: 0; border-left: none; border-top: 1px solid var(--border-glass); padding-top: 1.5rem; }
+        }
+        
+        @media (max-width: 500px) {
+          .modal-metrics-grid {
+            grid-template-columns: 1fr;
+          }
+          .modal-footer {
+            flex-direction: column;
+          }
         }
       `}</style>
     </section>
