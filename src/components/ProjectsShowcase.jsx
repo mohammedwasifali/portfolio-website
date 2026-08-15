@@ -560,11 +560,11 @@ const ProjectsShowcase = ({ onModalChange }) => {
           align-items: center;
           justify-content: center;
           padding: 2rem;
-          animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: modalFadeIn 0.6s ease-out forwards;
         }
 
         .modal-overlay.closing {
-          animation: modalFadeOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: modalFadeOut 0.55s ease-in forwards;
         }
 
         .modal-content {
@@ -581,11 +581,11 @@ const ProjectsShowcase = ({ onModalChange }) => {
           display: flex;
           flex-direction: column;
           transform-origin: var(--origin-x) var(--origin-y);
-          animation: modalZoomIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: modalZoomIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         .modal-overlay.closing .modal-content {
-          animation: modalZoomOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: modalZoomOut 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         .modal-header {
