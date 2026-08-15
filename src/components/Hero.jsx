@@ -73,7 +73,7 @@ const Hero = ({ onOpenResume }) => {
         .hero-card-top {
           height: 240px;
           position: relative;
-          background: transparent; /* Changed from dark blue to transparent so it naturally merges with white card */
+          background: #0a1118; /* Restored deep base color for rich gas effect */
         }
 
         /* Grain Overlay (sits above the blur, below the photo) */
@@ -96,9 +96,6 @@ const Hero = ({ onOpenResume }) => {
           -webkit-filter: blur(25px);
           transform: scale(1.2); /* Prevents edge bleeding */
           z-index: 1;
-          /* Mask makes the gas naturally dissipate at the bottom into the white card */
-          mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-          -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
         }
 
         /* Dynamic Mesh Blobs */
@@ -111,28 +108,28 @@ const Hero = ({ onOpenResume }) => {
         .mesh-blob-1 {
           top: -30%; left: -10%;
           width: 70%; height: 130%;
-          background: rgba(37, 99, 235, 0.8); /* Sapphire */
+          background: rgba(37, 99, 235, 0.9); /* Sapphire */
           animation: meshSway1 6s infinite alternate ease-in-out;
         }
 
         .mesh-blob-2 {
           bottom: -40%; right: -10%;
           width: 80%; height: 110%;
-          background: rgba(6, 182, 212, 0.8); /* Cyber Cyan */
+          background: rgba(6, 182, 212, 0.9); /* Cyber Cyan */
           animation: meshSway2 8s infinite alternate ease-in-out;
         }
 
         .mesh-blob-3 {
           top: 20%; left: 30%;
           width: 60%; height: 110%;
-          background: rgba(16, 185, 129, 0.6); /* Emerald Green */
+          background: rgba(16, 185, 129, 0.8); /* Emerald Green */
           animation: meshSway3 7s infinite alternate ease-in-out;
         }
         
         .mesh-blob-4 {
           top: -20%; right: 20%;
           width: 70%; height: 100%;
-          background: rgba(79, 70, 229, 0.8); /* Indigo */
+          background: rgba(79, 70, 229, 0.9); /* Indigo */
           animation: meshSway4 9s infinite alternate ease-in-out;
         }
 
