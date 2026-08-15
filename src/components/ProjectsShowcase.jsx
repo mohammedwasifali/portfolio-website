@@ -6,6 +6,7 @@ import {
   Route, 
   X,
   ArrowUpRight,
+  ArrowRight,
   ChevronRight
 } from 'lucide-react';
 
