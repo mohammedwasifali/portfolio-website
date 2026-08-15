@@ -8,35 +8,7 @@ const XIcon = ({ size = 18 }) => (
 );
 
 const ContactSection = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.message) return;
-
-    setIsSubmitting(true);
-    
-    // Construct mailto link with the form data
-    const mailtoLink = `mailto:mdwali0912@gmail.com?subject=${encodeURIComponent(formData.subject || 'New Contact Form Submission')}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`)}`;
-    
-    // Trigger the email client
-    window.location.href = mailtoLink;
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setIsSubmitted(false), 5000);
-    }, 1000);
-  };
 
   const handleCopy = (text, fieldName) => {
     navigator.clipboard.writeText(text);
@@ -146,99 +118,27 @@ const ContactSection = () => {
               </div>
             </div>
           </div>
-
-          {/* Right Column: Form */}
-          <div className="contact-apple-form-col">
-            <div className="glass-card form-card-apple">
-              <h3>Send Message</h3>
-
-              {isSubmitted ? (
-                <div className="form-success-apple">
-                  <CheckCircle2 size={40} className="text-emerald" />
-                  <h4>Message Delivered</h4>
-                  <p>Mohammed Wasif Ali will respond to your email shortly.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="contact-apple-form mt-3">
-                  <div className="form-row-2">
-                    <div className="input-group-apple">
-                      <label htmlFor="name">Name</label>
-                      <input 
-                        type="text" 
-                        id="name"
-                        name="name" 
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="Your Name"
-                        required
-                      />
-                    </div>
-                    <div className="input-group-apple">
-                      <label htmlFor="email">Email</label>
-                      <input 
-                        type="email" 
-                        id="email"
-                        name="email" 
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="you@example.com"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="input-group-apple">
-                    <label htmlFor="subject">Subject</label>
-                    <input 
-                      type="text" 
-                      id="subject"
-                      name="subject" 
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      placeholder="e.g. AI Engineering Collaboration"
-                    />
-                  </div>
-
-                  <div className="input-group-apple">
-                    <label htmlFor="message">Message</label>
-                    <textarea 
-                      id="message"
-                      name="message" 
-                      rows="4"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      placeholder="Share your message or opportunity details..."
-                      required
-                    ></textarea>
-                  </div>
-
-                  <button type="submit" className="btn btn-primary w-full mt-2" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-
         </div>
 
       </div>
 
       <style>{`
         .contact-apple-grid {
-          display: grid;
-          grid-template-columns: 0.9fr 1.1fr;
-          gap: 2.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          max-width: 650px;
+          margin: 0 auto;
         }
 
         .contact-apple-info {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 2rem;
         }
 
-        .contact-card-apple, .social-card-apple, .form-card-apple {
-          padding: 2.25rem;
+        .contact-card-apple, .social-card-apple {
+          padding: 2.5rem;
           h3, h4 { color: var(--text-main); }
         }
 
@@ -289,58 +189,8 @@ const ContactSection = () => {
           &:hover { background: rgba(0, 0, 0, 0.06); }
         }
 
-        /* Form */
-        .contact-apple-form {
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-        }
-
-        .form-row-2 {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1rem;
-        }
-
-        .input-group-apple {
-          display: flex;
-          flex-direction: column;
-          gap: 0.4rem;
-
-          label { font-size: 0.82rem; color: var(--text-muted); }
-
-          input, textarea {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid var(--border-glass);
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            color: var(--text-main);
-            font-family: var(--font-apple);
-            font-size: 0.92rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-
-            &:focus {
-              border-color: var(--accent-apple-blue);
-              box-shadow: 0 0 10px rgba(0, 113, 227, 0.15);
-            }
-          }
-        }
-
-        .form-success-apple {
-          text-align: center;
-          padding: 3rem 1rem;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.85rem;
-          h4 { color: var(--text-main); }
-          p { color: var(--text-muted); }
-        }
-
         @media (max-width: 900px) {
-          .contact-apple-grid { grid-template-columns: 1fr; }
-          .form-row-2 { grid-template-columns: 1fr; }
+          .contact-card-apple, .social-card-apple { padding: 1.5rem; }
         }
       `}</style>
     </section>
