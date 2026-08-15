@@ -18,8 +18,16 @@ function App() {
 
   return (
     <div className="app-main-wrapper">
-      {/* Dynamic Animated Canvas Background */}
+      {/* Dynamic Animated Canvas Background (Mac only) */}
       <CanvasBackground />
+
+      {/* Pure CSS Hardware-Accelerated Animated Background (iPhone only) */}
+      <div className="mobile-animated-bg">
+        <div className="mobile-blob mobile-blob-1"></div>
+        <div className="mobile-blob mobile-blob-2"></div>
+        <div className="mobile-blob mobile-blob-3"></div>
+        <div className="mobile-blob mobile-blob-4"></div>
+      </div>
 
       {/* Subtle Tech Grid Background */}
       <div className="grid-overlay"></div>
