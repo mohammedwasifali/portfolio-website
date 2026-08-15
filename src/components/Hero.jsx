@@ -33,15 +33,6 @@ const Hero = ({ onOpenResume }) => {
             <p className="hero-apple-subtitle">
               CS student with hands-on experience in full-stack development, machine learning, and applied AI research. Built end-to-end systems using Python, PyTorch, FastAPI, React, and SQL across healthcare and social-impact projects, backed by peer-reviewed conference papers and a Best Paper Award.
             </p>
-            
-            <div className="hero-apple-actions">
-              <button onClick={onOpenResume} className="btn btn-primary glass-btn">
-                <span>View Full Resume</span>
-              </button>
-              <a href="#projects" className="btn btn-secondary glass-btn">
-                <span>Explore Work</span>
-              </a>
-            </div>
           </div>
         </div>
 
@@ -82,7 +73,7 @@ const Hero = ({ onOpenResume }) => {
         .hero-card-top {
           height: 240px;
           position: relative;
-          background: #0a1118; /* Base Midnight Color */
+          background: transparent; /* Changed from dark blue to transparent so it naturally merges with white card */
         }
 
         /* Grain Overlay (sits above the blur, below the photo) */
@@ -101,7 +92,6 @@ const Hero = ({ onOpenResume }) => {
           position: absolute;
           inset: 0;
           overflow: hidden; 
-          /* No more expensive CSS blurs! We use radial gradients instead */
           transform: scale(1.15); /* Prevents edge bleeding */
           z-index: 1;
         }
@@ -116,28 +106,28 @@ const Hero = ({ onOpenResume }) => {
         .mesh-blob-1 {
           top: -30%; left: -10%;
           width: 70%; height: 130%;
-          background: radial-gradient(circle at center, rgba(37, 99, 235, 1) 0%, rgba(37, 99, 235, 0) 70%);
+          background: radial-gradient(circle at center, rgba(37, 99, 235, 0.4) 0%, rgba(37, 99, 235, 0) 70%);
           animation: meshSway1 6s infinite alternate ease-in-out;
         }
 
         .mesh-blob-2 {
           bottom: -40%; right: -10%;
           width: 80%; height: 110%;
-          background: radial-gradient(circle at center, rgba(6, 182, 212, 1) 0%, rgba(6, 182, 212, 0) 70%);
+          background: radial-gradient(circle at center, rgba(6, 182, 212, 0.4) 0%, rgba(6, 182, 212, 0) 70%);
           animation: meshSway2 8s infinite alternate ease-in-out;
         }
 
         .mesh-blob-3 {
           top: 20%; left: 30%;
           width: 60%; height: 110%;
-          background: radial-gradient(circle at center, rgba(16, 185, 129, 0.9) 0%, rgba(16, 185, 129, 0) 70%);
+          background: radial-gradient(circle at center, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0) 70%);
           animation: meshSway3 7s infinite alternate ease-in-out;
         }
         
         .mesh-blob-4 {
           top: -20%; right: 20%;
           width: 70%; height: 100%;
-          background: radial-gradient(circle at center, rgba(79, 70, 229, 1) 0%, rgba(79, 70, 229, 0) 70%);
+          background: radial-gradient(circle at center, rgba(79, 70, 229, 0.4) 0%, rgba(79, 70, 229, 0) 70%);
           animation: meshSway4 9s infinite alternate ease-in-out;
         }
 
@@ -215,33 +205,10 @@ const Hero = ({ onOpenResume }) => {
           font-weight: 400;
           max-width: 1000px;
         }
-        
-        .hero-apple-actions {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1.5rem;
-          flex-wrap: wrap;
-        }
-        
-        .glass-btn {
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        /* Smooth fade from dark top to white bottom */
-        .hero-card-top::after {
-          content: '';
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          height: 40px;
-          background: linear-gradient(to bottom, rgba(255,255,255,0), var(--bg-card));
-          z-index: 5;
-        }
 
         @media (max-width: 768px) {
           .hero-apple-section {
-            padding-top: 3rem; /* Push the whole card much higher */
+            padding-top: 3rem; 
             padding-bottom: 1rem;
           }
           .hero-apple-container {
@@ -252,35 +219,26 @@ const Hero = ({ onOpenResume }) => {
             border-radius: 20px;
           }
           .hero-card-top {
-            height: 120px; /* Much shorter top section */
+            height: 140px; /* Slight adjustment to fit the left-aligned layout perfectly */
           }
           .hero-photo-wrapper {
-            width: 110px; /* Smaller photo to save space */
-            height: 110px;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
+            width: 90px; /* Smaller photo since it's on the left */
+            height: 90px;
+            bottom: -45px; /* Overlaps exactly halfway */
+            left: 1.5rem; /* Left-aligned */
+            transform: none; /* Remove center transform */
           }
           .hero-card-bottom {
-            padding: 3.5rem 1.2rem 1.5rem 1.2rem; /* Reduce massive vertical padding */
-            text-align: center;
+            padding: 3.5rem 1.5rem 1.5rem 1.5rem; /* Padding matches the left alignment */
+            text-align: left; /* Left-align the text to match the photo */
           }
           .hero-apple-title {
-            font-size: 1.8rem; /* Fit name on one line if possible */
+            font-size: 2rem; 
             margin-top: 0;
           }
           .hero-apple-subtitle {
-            font-size: 0.9rem; /* Smaller text to fit all description */
-            line-height: 1.4;
-          }
-          .hero-apple-actions {
-            margin-top: 1rem;
-            gap: 0.5rem;
-            justify-content: center;
-          }
-          .hero-apple-actions .btn {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
+            font-size: 0.95rem; 
+            line-height: 1.5;
           }
         }
       `}</style>
