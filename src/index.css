@@ -72,7 +72,8 @@ body {
 
 @media (max-width: 768px) {
   body {
-    background: linear-gradient(135deg, #0a1118 0%, #102a43 50%, #064e3b 100%) !important;
+    /* Extremely soft, premium light Apple gradient to keep black text visible */
+    background: linear-gradient(135deg, #f5f7fa 0%, #eef2f5 50%, #f0fdf4 100%) !important;
   }
   .lava-canvas {
     display: none !important;
