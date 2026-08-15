@@ -29,8 +29,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
   };
 
   const categories = ['All', 'Clinical AI', 'Few-Shot Learning', 'Generative AI', 'Blockchain', 'Systems & Networks', 'Computer Vision'];
-  // Create an infinite array for the mobile picker wheel
-  const infiniteCategories = [...categories, ...categories, ...categories];
+  // Create a massive array to simulate infinite scroll seamlessly without JS jump glitches
+  const infiniteCategories = Array(50).fill(categories).flat();
 
   React.useEffect(() => {
     if (onModalChange) {
@@ -60,19 +60,17 @@ const ProjectsShowcase = ({ onModalChange }) => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Center the initial view on the MIDDLE copy of the items (index 7 to 13)
+    // Center the initial view on the exact middle of the massive array
     if (!scrollInitRef.current) {
-      const middleIdx = categories.length; // 'All' in the middle array
-      const targetBtn = tabsRef.current[middleIdx];
+      const middleCopyIdx = Math.floor(infiniteCategories.length / 2);
+      // Ensure we start at the 'All' category of that copy (index % 7 == 0)
+      const startIdx = middleCopyIdx - (middleCopyIdx % categories.length); 
+      const targetBtn = tabsRef.current[startIdx];
+      
       if (targetBtn) {
         const containerCenter = container.offsetWidth / 2;
         const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
-        container.style.scrollSnapType = 'none';
         container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
-        // Restore snapping
-        requestAnimationFrame(() => {
-          container.style.scrollSnapType = 'x mandatory';
-        });
         scrollInitRef.current = true;
       }
     }
@@ -113,23 +111,10 @@ const ProjectsShowcase = ({ onModalChange }) => {
             if (prev !== cat) return cat;
             return prev;
           });
-
-          // INFINITE LOOP JUMP: If user scrolls into the first or third array clone, seamlessly jump back to the middle array!
-          if (closestIdx < categories.length || closestIdx >= categories.length * 2) {
-            const middleIdx = (closestIdx % categories.length) + categories.length;
-            const targetBtn = tabsRef.current[middleIdx];
-            if (targetBtn) {
-              const bCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
-              
-              // Disable snap temporarily to prevent visual jitter or bounce-back during the instant teleport
-              container.style.scrollSnapType = 'none';
-              container.scrollTo({ left: bCenter - container.offsetWidth / 2, behavior: 'auto' });
-              
-              requestAnimationFrame(() => {
-                container.style.scrollSnapType = 'x mandatory';
-              });
-            }
-          }
+          
+          // Note: We removed the teleport jump logic here. 
+          // By using a massive 50-copy array, the user can swipe 175 times before hitting a wall.
+          // This avoids the glitchy touch-interruption that iOS Safari experiences during scroll teleporting!
         }
       }, 60); // Debounce
     };
