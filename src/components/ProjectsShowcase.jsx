@@ -230,7 +230,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
         {/* Section Header */}
         <div className="section-header">
           <span className="sub-tag">Portfolio & Systems</span>
-          <h2>Featured AI Projects</h2>
+          <h2>Projects</h2>
           <p>
             End-to-end machine learning pipelines, clinical diagnostic tools, and high-performance algorithms.
           </p>
