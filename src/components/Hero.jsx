@@ -80,12 +80,6 @@ const Hero = ({ onOpenResume }) => {
           height: 240px;
           position: relative;
           background: #0a1118; /* Restored deep base color for rich gas effect */
-          
-          /* Extra safety for Safari clipping */
-          border-top-left-radius: 24px;
-          border-top-right-radius: 24px;
-          overflow: hidden;
-          -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
 
         /* Grain Overlay (sits above the blur, below the photo) */
@@ -234,8 +228,6 @@ const Hero = ({ onOpenResume }) => {
           }
           .hero-card-top {
             height: 140px; 
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
           }
           .hero-photo-wrapper {
             width: 90px; /* Smaller photo since it's on the left */
