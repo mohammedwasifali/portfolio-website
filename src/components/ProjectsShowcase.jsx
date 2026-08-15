@@ -39,10 +39,10 @@ const ProjectsShowcase = ({ onModalChange }) => {
   }, [selectedProject, onModalChange]);
 
   React.useEffect(() => {
-    // On desktop, only track the original categories
+    // Track width for BOTH desktop and mobile
     const activeIndex = categories.indexOf(activeFilter);
     const activeTab = tabsRef.current[activeIndex];
-    if (activeTab && window.innerWidth > 768) {
+    if (activeTab) {
       setSliderStyle({
         left: activeTab.offsetLeft,
         width: activeTab.offsetWidth,
@@ -52,6 +52,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
   }, [activeFilter, categories]);
 
   // Mobile scroll tracking for Infinite Picker Wheel effect
+  const lastVibratedIdx = React.useRef(-1);
+
   React.useEffect(() => {
     if (window.innerWidth > 768) return;
 
@@ -65,30 +67,45 @@ const ProjectsShowcase = ({ onModalChange }) => {
       if (targetBtn) {
         const containerCenter = container.offsetWidth / 2;
         const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
+        container.style.scrollSnapType = 'none';
         container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
+        // Restore snapping
+        requestAnimationFrame(() => {
+          container.style.scrollSnapType = 'x mandatory';
+        });
         scrollInitRef.current = true;
       }
     }
 
     const handleScroll = () => {
+      // Real-time calculation for Haptics during scroll
+      const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
+      let closestIdx = -1;
+      let minDistance = Infinity;
+
+      tabsRef.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const elCenter = rect.left + rect.width / 2;
+        const distance = Math.abs(containerCenter - elCenter);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestIdx = idx;
+        }
+      });
+
+      // Trigger Haptic Feedback exactly when a new item crosses the center!
+      if (closestIdx !== -1 && closestIdx !== lastVibratedIdx.current) {
+        lastVibratedIdx.current = closestIdx;
+        if (navigator.vibrate) {
+          // A tiny 10ms click vibration (supported on Android, ignored silently on iOS Safari)
+          navigator.vibrate(10);
+        }
+      }
+
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
       
       scrollTimeoutRef.current = setTimeout(() => {
-        const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
-        let closestIdx = -1;
-        let minDistance = Infinity;
-
-        tabsRef.current.forEach((el, idx) => {
-          if (!el) return;
-          const rect = el.getBoundingClientRect();
-          const elCenter = rect.left + rect.width / 2;
-          const distance = Math.abs(containerCenter - elCenter);
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestIdx = idx;
-          }
-        });
-
         if (closestIdx !== -1) {
           const cat = infiniteCategories[closestIdx];
           
@@ -103,11 +120,18 @@ const ProjectsShowcase = ({ onModalChange }) => {
             const targetBtn = tabsRef.current[middleIdx];
             if (targetBtn) {
               const bCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
+              
+              // Disable snap temporarily to prevent visual jitter or bounce-back during the instant teleport
+              container.style.scrollSnapType = 'none';
               container.scrollTo({ left: bCenter - container.offsetWidth / 2, behavior: 'auto' });
+              
+              requestAnimationFrame(() => {
+                container.style.scrollSnapType = 'x mandatory';
+              });
             }
           }
         }
-      }, 50); // Debounce
+      }, 60); // Debounce
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
