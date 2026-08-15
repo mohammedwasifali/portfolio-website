@@ -464,6 +464,29 @@ const ProjectsShowcase = ({ onModalChange }) => {
           gap: 0.6rem;
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
+
+        @media (max-width: 768px) {
+          .segmented-control-container {
+            justify-content: flex-start;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Allow scrolling edge-to-edge on iPhone */
+            margin-left: -5%;
+            margin-right: -5%;
+            padding-left: 5%;
+            padding-right: 5%;
+            padding-bottom: 0.5rem;
+          }
+          
+          .segmented-control-container::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for clean iOS look */
+          }
+
+          .segmented-control {
+            flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
+            white-space: nowrap;
+          }
+        }
       `}</style>
     </section>
   );

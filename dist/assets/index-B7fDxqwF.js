@@ -712,6 +712,29 @@ Error generating stack: `+i.message+`
           gap: 0.6rem;
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
+
+        @media (max-width: 768px) {
+          .segmented-control-container {
+            justify-content: flex-start;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Allow scrolling edge-to-edge on iPhone */
+            margin-left: -5%;
+            margin-right: -5%;
+            padding-left: 5%;
+            padding-right: 5%;
+            padding-bottom: 0.5rem;
+          }
+          
+          .segmented-control-container::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for clean iOS look */
+          }
+
+          .segmented-control {
+            flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
+            white-space: nowrap;
+          }
+        }
       `})]})},fp=()=>{const[e,t]=R.useState("All"),[n,r]=R.useState({left:0,width:0,opacity:0}),l=it.useRef([]),i=["All","ML & Deep Learning","Languages & Core CS","Data & Analytics","Systems & Infrastructure"];it.useEffect(()=>{const s=i.indexOf(e),u=l.current[s];u&&r({left:u.offsetLeft,width:u.offsetWidth,opacity:1})},[e,i]);const a=[{category:"ML & Deep Learning",icon:In,color:"#5e5ce6",skills:["PyTorch","Scikit-learn","Few-Shot Learning","Transformer Architectures","Deep Learning"]},{category:"Languages & Core CS",icon:pc,color:"#ff9500",skills:["Python","C","C++","SQL","Data Structures & Algorithms","OS, DBMS & OOP"]},{category:"Data & Analytics",icon:tp,color:"#30b0c7",skills:["Pandas","NumPy","Exploratory Data Analysis","Data Preprocessing","Feature Engineering"]},{category:"Systems & Infrastructure",icon:ap,color:"#34c759",skills:["Linux","Git","Cloud Computing Concepts","FastAPI","React"]}];return o.jsxs("section",{id:"skills",className:"section-padding skills-apple-section",children:[o.jsxs("div",{className:"container",children:[o.jsxs("div",{className:"section-header",children:[o.jsx("span",{className:"sub-tag",children:"Technical Competencies"}),o.jsx("h2",{children:"Skills & Technologies"}),o.jsx("p",{children:"Frameworks, languages, and infrastructure tools utilized in ML engineering and clinical systems."})]}),o.jsx("div",{className:"segmented-control-container",style:{display:"flex",justifyContent:"center",marginBottom:"3rem"},children:o.jsxs("div",{className:"segmented-control",style:{display:"inline-flex",background:"rgba(0,0,0,0.05)",padding:"4px",borderRadius:"9999px",flexWrap:"wrap",justifyContent:"center",gap:"2px",position:"relative"},children:[o.jsx("div",{style:{position:"absolute",top:"4px",height:"calc(100% - 8px)",left:`${n.left}px`,width:`${n.width}px`,opacity:n.opacity,transition:"all 1.4s cubic-bezier(0.22, 1, 0.36, 1)",borderRadius:"9999px",background:"linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)",backdropFilter:"blur(30px) saturate(250%)",WebkitBackdropFilter:"blur(30px) saturate(250%)",border:"1px solid rgba(255, 255, 255, 0.6)",boxShadow:"inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2)",zIndex:1}}),i.map((s,u)=>o.jsx("button",{ref:d=>l.current[u]=d,onClick:()=>t(s),style:{padding:"0.6rem 1.2rem",borderRadius:"9999px",border:"none",background:"transparent",color:e===s?"#1d1d1f":"#6e6e73",fontWeight:e===s?"600":"500",fontSize:"0.9rem",cursor:"pointer",transition:"all 0.8s ease",position:"relative",zIndex:e===s?2:0},children:s},s))]})}),o.jsx("div",{className:"skills-apple-grid",children:a.filter(s=>e==="All"||s.category===e).map(s=>{const u=s.icon;return o.jsxs("div",{className:"skill-apple-card glass-card",children:[o.jsxs("div",{className:"group-card-header",children:[o.jsx("div",{className:"icon-wrapper",style:{color:s.color,background:`${s.color}15`},children:o.jsx(u,{size:22})}),o.jsx("h3",{children:s.category})]}),o.jsx("div",{className:"premium-skills-container",children:s.skills.map(d=>o.jsxs("div",{className:"premium-skill-pill",children:[o.jsx("span",{className:"pill-dot",style:{background:s.color,boxShadow:`0 0 8px ${s.color}`}}),d]},d))})]},s.category)})})]}),o.jsx("style",{children:`
         .skills-apple-grid {
           display: grid;
