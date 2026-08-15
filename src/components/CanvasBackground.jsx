@@ -16,6 +16,9 @@ const CanvasBackground = () => {
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      if (window.innerWidth < 768) {
+        draw(); // Force a redraw on phone rotation since the loop is paused
+      }
     };
     window.addEventListener('resize', handleResize);
 
@@ -53,11 +56,13 @@ const CanvasBackground = () => {
     let targetMouseY = height / 2;
 
     const handleMouseMove = (e) => {
+      if (isMobile) return; // Disable event overhead on mobile
       targetMouseX = e.clientX;
       targetMouseY = e.clientY;
     };
 
     const handleTouchMove = (e) => {
+      if (isMobile) return; // Disable event overhead on mobile
       if (e.touches.length > 0) {
         targetMouseX = e.touches[0].clientX;
         targetMouseY = e.touches[0].clientY;
@@ -114,7 +119,10 @@ const CanvasBackground = () => {
         ctx.fill();
       });
 
-      animationFrameId = requestAnimationFrame(draw);
+      // ONLY loop the animation on desktop. On mobile, this will draw exactly once and freeze, saving 100% of the CPU/GPU power.
+      if (!isMobile) {
+        animationFrameId = requestAnimationFrame(draw);
+      }
     };
 
     draw();
@@ -122,7 +130,10 @@ const CanvasBackground = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('touchmove', handleTouchMove);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
   }, []);
 
