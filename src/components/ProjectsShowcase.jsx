@@ -29,8 +29,6 @@ const ProjectsShowcase = ({ onModalChange }) => {
   };
 
   const categories = ['All', 'Clinical AI', 'Few-Shot Learning', 'Generative AI', 'Blockchain', 'Systems & Networks', 'Computer Vision'];
-  // Create a massive array to simulate infinite scroll seamlessly without JS jump glitches
-  const infiniteCategories = Array(50).fill(categories).flat();
 
   React.useEffect(() => {
     if (onModalChange) {
@@ -39,7 +37,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
   }, [selectedProject, onModalChange]);
 
   React.useEffect(() => {
-    // Track width for BOTH desktop and mobile
+    // Track width and left for BOTH desktop and mobile
     const activeIndex = categories.indexOf(activeFilter);
     const activeTab = tabsRef.current[activeIndex];
     if (activeTab) {
@@ -48,83 +46,23 @@ const ProjectsShowcase = ({ onModalChange }) => {
         width: activeTab.offsetWidth,
         opacity: 1
       });
+      
+      // On mobile, if active filter changes programmatically or on mount, smoothly scroll it into view
+      if (window.innerWidth <= 768 && containerRef.current) {
+        const container = containerRef.current;
+        const containerCenter = container.offsetWidth / 2;
+        const buttonCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
+        
+        // We only want to scroll if it's off-center, but a small delay helps on mount
+        setTimeout(() => {
+          container.scrollTo({
+            left: buttonCenter - containerCenter,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
     }
   }, [activeFilter, categories]);
-
-  // Mobile scroll tracking for Infinite Picker Wheel effect
-  const lastVibratedIdx = React.useRef(-1);
-
-  React.useEffect(() => {
-    if (window.innerWidth > 768) return;
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Center the initial view on the exact middle of the massive array
-    if (!scrollInitRef.current) {
-      // Delay slightly to ensure DOM is fully painted so offsetLeft is correct
-      setTimeout(() => {
-        const middleCopyIdx = Math.floor(infiniteCategories.length / 2);
-        // Ensure we start at the 'All' category of that copy (index % 7 == 0)
-        const startIdx = middleCopyIdx - (middleCopyIdx % categories.length); 
-        const targetBtn = tabsRef.current[startIdx];
-        
-        if (targetBtn) {
-          const containerCenter = container.offsetWidth / 2;
-          const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
-          container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
-          scrollInitRef.current = true;
-        }
-      }, 100);
-    }
-
-    const handleScroll = () => {
-      // Real-time calculation for Haptics during scroll
-      const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
-      let closestIdx = -1;
-      let minDistance = Infinity;
-
-      tabsRef.current.forEach((el, idx) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.left + rect.width / 2;
-        const distance = Math.abs(containerCenter - elCenter);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIdx = idx;
-        }
-      });
-
-      // Trigger Haptic Feedback exactly when a new item crosses the center!
-      if (closestIdx !== -1 && closestIdx !== lastVibratedIdx.current) {
-        lastVibratedIdx.current = closestIdx;
-        if (navigator.vibrate) {
-          // A tiny 10ms click vibration (supported on Android, ignored silently on iOS Safari)
-          navigator.vibrate(10);
-        }
-      }
-
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      
-      scrollTimeoutRef.current = setTimeout(() => {
-        if (closestIdx !== -1) {
-          const cat = infiniteCategories[closestIdx];
-          
-          setActiveFilter(prev => {
-            if (prev !== cat) return cat;
-            return prev;
-          });
-          
-          // Note: We removed the teleport jump logic here. 
-          // By using a massive 50-copy array, the user can swipe 175 times before hitting a wall.
-          // This avoids the glitchy touch-interruption that iOS Safari experiences during scroll teleporting!
-        }
-      }, 60); // Debounce
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []); // Run once to attach listener
 
   const projects = [
     {
@@ -299,13 +237,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
         </div>
 
         {/* iOS-Style Segmented Control Filter Bar */}
-        <div className="segmented-wrapper" style={{ position: 'relative' }}>
-          {/* Mobile Fixed Center Line */}
-          <div 
-            className="mobile-fixed-line" 
-            style={{ width: `${sliderStyle.width}px` }} 
-          />
-
+        <div className="segmented-wrapper">
           <div className="segmented-control-container" ref={containerRef}>
             <div className="segmented-control" style={{ position: 'relative' }}>
               <div 
@@ -317,39 +249,27 @@ const ProjectsShowcase = ({ onModalChange }) => {
                   left: `${sliderStyle.left}px`,
                   width: `${sliderStyle.width}px`,
                   opacity: sliderStyle.opacity,
-                  transition: 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+                  transition: 'all 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
                   borderRadius: '9999px',
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)',
                   backdropFilter: 'blur(30px) saturate(250%)',
                   WebkitBackdropFilter: 'blur(30px) saturate(250%)',
                   border: '1px solid rgba(255, 255, 255, 0.6)',
                   boxShadow: 'inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2)',
+                  pointerEvents: 'none',
                   zIndex: 1
                 }}
               />
-              {infiniteCategories.map((cat, idx) => (
+              {categories.map((cat, idx) => (
                 <button
-                  key={`${cat}-${idx}`}
+                  key={cat}
                   ref={el => tabsRef.current[idx] = el}
-                  onClick={(e) => {
-                    setActiveFilter(cat);
-                    if (window.innerWidth <= 768) {
-                      const container = containerRef.current;
-                      if (container) {
-                        const containerCenter = container.offsetWidth / 2;
-                        const buttonCenter = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
-                        container.scrollTo({
-                          left: buttonCenter - containerCenter,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }
-                  }}
-                  className={`segment-btn ${activeFilter === cat ? 'active' : ''} ${idx >= categories.length ? 'mobile-only-tab' : ''}`}
+                  onClick={() => setActiveFilter(cat)}
+                  className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
                   style={{ 
                     position: 'relative', 
-                    zIndex: activeFilter === cat ? 2 : 0,
-                    transition: 'color 0.8s ease'
+                    zIndex: 2,
+                    transition: 'color 0.5s ease'
                   }}
                 >
                   {cat}
@@ -568,16 +488,6 @@ const ProjectsShowcase = ({ onModalChange }) => {
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
 
-        .mobile-fixed-line {
-          display: none;
-        }
-
-        @media (min-width: 769px) {
-          .mobile-only-tab {
-            display: none !important;
-          }
-        }
-
         @media (max-width: 768px) {
           .segmented-control-container {
             justify-content: flex-start;
@@ -586,13 +496,9 @@ const ProjectsShowcase = ({ onModalChange }) => {
             /* Allow scrolling edge-to-edge on iPhone */
             margin-left: -5%;
             margin-right: -5%;
-            /* Add enough padding so first and last items can reach the center */
-            padding-left: calc(50vw - 40px);
-            padding-right: calc(50vw - 40px);
-            padding-bottom: 1rem;
-            scroll-snap-type: x mandatory;
-            position: relative;
-            z-index: 2; /* Forces text to render completely ON TOP of the fixed line */
+            padding-left: 5%;
+            padding-right: 5%;
+            padding-bottom: 0.5rem;
           }
           
           .segmented-control-container::-webkit-scrollbar {
@@ -602,32 +508,6 @@ const ProjectsShowcase = ({ onModalChange }) => {
           .segmented-control {
             flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
             white-space: nowrap;
-            background: transparent !important; /* Removes track background */
-            border: none !important;
-          }
-
-          .segment-btn {
-            scroll-snap-align: center;
-          }
-
-          .desktop-slider-bubble {
-            display: none; /* Hide desktop sliding bubble */
-          }
-
-          .mobile-fixed-line {
-            display: block;
-            position: absolute;
-            bottom: 4px; /* Sits right below the text */
-            height: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            /* Sleek glowing Apple-style slider indicator */
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6); /* Sapphire to Indigo */
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
-            border-radius: 9999px;
-            pointer-events: none;
-            transition: width 0.3s ease;
-            z-index: 1; /* Sits UNDER the text container */
           }
         }
       `}</style>
