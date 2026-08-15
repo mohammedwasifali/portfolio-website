@@ -64,6 +64,12 @@ const Hero = ({ onOpenResume }) => {
           border: 1px solid var(--border-glass);
           border-radius: 24px;
           overflow: hidden; /* This hides the bottom corners of the card itself */
+          
+          /* CRITICAL BUGFIX FOR SAFARI IPHONE: 
+             Forces border-radius clipping on elements that use filter: blur() or transforms */
+          -webkit-mask-image: -webkit-radial-gradient(white, black);
+          transform: translateZ(0);
+
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
           margin-bottom: 2rem;
           position: relative;
@@ -74,6 +80,12 @@ const Hero = ({ onOpenResume }) => {
           height: 240px;
           position: relative;
           background: #0a1118; /* Restored deep base color for rich gas effect */
+          
+          /* Extra safety for Safari clipping */
+          border-top-left-radius: 24px;
+          border-top-right-radius: 24px;
+          overflow: hidden;
+          -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
 
         /* Grain Overlay (sits above the blur, below the photo) */
@@ -221,7 +233,9 @@ const Hero = ({ onOpenResume }) => {
             border-radius: 20px;
           }
           .hero-card-top {
-            height: 140px; /* Slight adjustment to fit the left-aligned layout perfectly */
+            height: 140px; 
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
           }
           .hero-photo-wrapper {
             width: 90px; /* Smaller photo since it's on the left */
