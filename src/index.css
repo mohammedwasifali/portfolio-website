@@ -68,48 +68,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Quiet Soft Light Background Orbs */
-.ambient-background {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
+/* Removed .ambient-background and .ambient-orb as they were crushing performance */
 
-.ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(140px);
-  opacity: 0.25;
-  animation: appleGlow 25s infinite ease-in-out alternate;
-}
-
-.orb-1 {
-  width: 600px; height: 600px;
-  background: #cce4ff;
-  top: -150px; left: -100px;
-}
-
-.orb-2 {
-  width: 500px; height: 500px;
-  background: #e2d9ff;
-  bottom: 5%; right: -100px;
-  animation-delay: -10s;
-}
-
-.orb-3 {
-  width: 400px; height: 400px;
-  background: #d1f7e0;
-  top: 45%; left: 35%;
-  opacity: 0.15;
-  animation-delay: -18s;
-}
-
-@keyframes appleGlow {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(40px, 60px) scale(1.05); }
-  100% { transform: translate(-30px, 30px) scale(0.95); }
+@media (max-width: 768px) {
+  body {
+    background: linear-gradient(135deg, #0a1118 0%, #102a43 50%, #064e3b 100%) !important;
+  }
+  .lava-canvas {
+    display: none !important;
+  }
 }
 
 .grid-overlay {

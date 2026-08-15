@@ -259,9 +259,12 @@ const Hero = ({ onOpenResume }) => {
             justify-content: center;
           }
           /* MASSIVE PERFORMANCE FIX FOR MOBILE */
+          .hero-card-top-bg {
+            background: linear-gradient(135deg, rgba(37,99,235,0.9), rgba(16,185,129,0.9));
+            filter: none !important; /* Remove huge blur */
+          }
           .mesh-blob {
-            animation: none !important; /* Stop expensive blur animations on mobile */
-            filter: blur(15px);
+            display: none !important; /* Completely delete from rendering engine */
           }
         }
       `}</style>

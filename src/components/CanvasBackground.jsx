@@ -4,6 +4,9 @@ const CanvasBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -31,8 +34,7 @@ const CanvasBackground = () => {
       'rgba(16, 185, 129,'   // Emerald Green
     ];
 
-    const isMobile = window.innerWidth < 768;
-    const orbCount = isMobile ? 5 : 15; // Drastically reduce on mobile for performance
+    const orbCount = 15; // It's only rendered on desktop anyway, so always 15
 
     const orbs = [];
     // Lava lamps have a small number of massive, slow-moving blobs
@@ -140,6 +142,7 @@ const CanvasBackground = () => {
   return (
     <canvas
       ref={canvasRef}
+      className="lava-canvas"
       style={{
         position: 'fixed',
         top: 0,

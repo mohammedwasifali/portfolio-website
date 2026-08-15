@@ -21,13 +21,6 @@ function App() {
       {/* Dynamic Animated Canvas Background */}
       <CanvasBackground />
 
-      {/* Ambient Radial Glowing Orbs */}
-      <div className="ambient-background">
-        <div className="ambient-orb orb-1"></div>
-        <div className="ambient-orb orb-2"></div>
-        <div className="ambient-orb orb-3"></div>
-      </div>
-
       {/* Subtle Tech Grid Background */}
       <div className="grid-overlay"></div>
 
