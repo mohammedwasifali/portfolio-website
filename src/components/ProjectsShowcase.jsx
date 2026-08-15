@@ -221,6 +221,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
         <div className="segmented-control-container">
           <div className="segmented-control" style={{ position: 'relative' }}>
             <div 
+              className="mobile-slider-bubble"
               style={{
                 position: 'absolute',
                 top: '4px',
@@ -228,7 +229,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
                 left: `${sliderStyle.left}px`,
                 width: `${sliderStyle.width}px`,
                 opacity: sliderStyle.opacity,
-                transition: 'all 1.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                transition: 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
                 borderRadius: '9999px',
                 background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(30px) saturate(250%)',
@@ -242,7 +243,21 @@ const ProjectsShowcase = ({ onModalChange }) => {
               <button
                 key={cat}
                 ref={el => tabsRef.current[idx] = el}
-                onClick={() => setActiveFilter(cat)}
+                onClick={(e) => {
+                  setActiveFilter(cat);
+                  // On mobile, automatically slide the strip so the selected bubble is in the center
+                  if (window.innerWidth <= 768) {
+                    const container = e.currentTarget.closest('.segmented-control-container');
+                    if (container) {
+                      const containerCenter = container.offsetWidth / 2;
+                      const buttonCenter = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
+                      container.scrollTo({
+                        left: buttonCenter - containerCenter,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }
+                }}
                 className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
                 style={{ 
                   position: 'relative', 
