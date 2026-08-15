@@ -28,15 +28,18 @@ const CanvasBackground = () => {
       'rgba(16, 185, 129,'   // Emerald Green
     ];
 
+    const isMobile = window.innerWidth < 768;
+    const orbCount = isMobile ? 5 : 15; // Drastically reduce on mobile for performance
+
     const orbs = [];
     // Lava lamps have a small number of massive, slow-moving blobs
-    for (let i = 0; i < 15; i++) { 
+    for (let i = 0; i < orbCount; i++) { 
       orbs.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 1.5, // Slow horizontal sway
         vy: (Math.random() - 0.5) * 3.0, // Faster vertical drift like rising/falling lava
-        baseRadius: Math.random() * (width * 0.15) + 150, // Absolute Behemoths
+        baseRadius: Math.random() * (width * 0.15) + (isMobile ? 100 : 150), // Slightly smaller on mobile
         radius: 0,
         colorBase: colors[i % colors.length],
         angle: Math.random() * Math.PI * 2,
@@ -70,8 +73,9 @@ const CanvasBackground = () => {
       mouseX += (targetMouseX - mouseX) * 0.05;
       mouseY += (targetMouseY - mouseY) * 0.05;
 
-      // 'screen' makes overlapping lava blobs merge brightly and beautifully like glowing liquid
-      ctx.globalCompositeOperation = 'screen';
+      // 'screen' makes overlapping lava blobs merge brightly and beautifully like glowing liquid.
+      // However, it is extremely expensive on mobile Safari, so we use 'source-over' on small screens.
+      ctx.globalCompositeOperation = isMobile ? 'source-over' : 'screen';
 
       orbs.forEach((orb, i) => {
         // Morphing size to simulate liquid stretching

@@ -221,6 +221,11 @@ const Hero = ({ onOpenResume }) => {
             font-size: 2.2rem;
             margin-top: 0.5rem;
           }
+          /* MASSIVE PERFORMANCE FIX FOR MOBILE */
+          .mesh-blob {
+            animation: none !important; /* Stop expensive blur animations on mobile */
+            filter: blur(15px);
+          }
         }
       `}</style>
     </section>
