@@ -238,7 +238,7 @@ const ResearchPublications = ({ onModalChange }) => {
               <X size={18} />
             </button>
 
-            <div className="modal-header">
+            <div className="pub-modal-header">
               <span className="badge badge-cyan">{selectedPaper.venue}</span>
               <h3 className="modal-title mt-2">{selectedPaper.title}</h3>
               <p className="modal-authors">Authors: Mohammed Wasif Ali et al.</p>
@@ -436,6 +436,11 @@ const ResearchPublications = ({ onModalChange }) => {
           &:hover { color: var(--text-main); }
         }
 
+        .pub-modal-header { 
+          padding-bottom: 1.5rem; 
+          margin-bottom: 1.5rem; 
+          border-bottom: 1px solid var(--border-glass); 
+        }
         .modal-title { font-size: 1.4rem; line-height: 1.3; color: var(--text-main); }
         .modal-authors { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; }
 
