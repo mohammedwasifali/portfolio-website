@@ -29,6 +29,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
   };
 
   const categories = ['All', 'Clinical AI', 'Few-Shot Learning', 'Generative AI', 'Blockchain', 'Systems & Networks', 'Computer Vision'];
+  // Create a massive array (100 copies) to simulate infinite scroll flawlessly
+  const infiniteCategories = Array(100).fill(categories).flat();
 
   React.useEffect(() => {
     if (onModalChange) {
@@ -46,23 +48,74 @@ const ProjectsShowcase = ({ onModalChange }) => {
         width: activeTab.offsetWidth,
         opacity: 1
       });
-      
-      // On mobile, if active filter changes programmatically or on mount, smoothly scroll it into view
-      if (window.innerWidth <= 768 && containerRef.current) {
-        const container = containerRef.current;
-        const containerCenter = container.offsetWidth / 2;
-        const buttonCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
-        
-        // We only want to scroll if it's off-center, but a small delay helps on mount
-        setTimeout(() => {
-          container.scrollTo({
-            left: buttonCenter - containerCenter,
-            behavior: 'smooth'
-          });
-        }, 50);
-      }
     }
   }, [activeFilter, categories]);
+
+  // Mobile scroll tracking for Infinite Picker Wheel effect
+  const lastVibratedIdx = React.useRef(-1);
+
+  React.useEffect(() => {
+    if (window.innerWidth > 768) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Center the initial view on the exact middle of the massive array
+    if (!scrollInitRef.current) {
+      // Delay slightly to ensure DOM is fully painted so offsetLeft is correct
+      setTimeout(() => {
+        const middleCopyIdx = Math.floor(infiniteCategories.length / 2);
+        const startIdx = middleCopyIdx - (middleCopyIdx % categories.length); 
+        const targetBtn = tabsRef.current[startIdx];
+        
+        if (targetBtn) {
+          const containerCenter = container.offsetWidth / 2;
+          const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
+          container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
+          scrollInitRef.current = true;
+        }
+      }, 100);
+    }
+
+    const handleScroll = () => {
+      const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
+      let closestIdx = -1;
+      let minDistance = Infinity;
+
+      tabsRef.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const elCenter = rect.left + rect.width / 2;
+        const distance = Math.abs(containerCenter - elCenter);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestIdx = idx;
+        }
+      });
+
+      if (closestIdx !== -1 && closestIdx !== lastVibratedIdx.current) {
+        lastVibratedIdx.current = closestIdx;
+        if (navigator.vibrate) {
+          navigator.vibrate(10);
+        }
+      }
+
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      
+      scrollTimeoutRef.current = setTimeout(() => {
+        if (closestIdx !== -1) {
+          const cat = infiniteCategories[closestIdx];
+          setActiveFilter(prev => {
+            if (prev !== cat) return cat;
+            return prev;
+          });
+        }
+      }, 60); // Debounce
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []); // Run once to attach listener
 
   const projects = [
     {
@@ -237,7 +290,13 @@ const ProjectsShowcase = ({ onModalChange }) => {
         </div>
 
         {/* iOS-Style Segmented Control Filter Bar */}
-        <div className="segmented-wrapper">
+        <div className="segmented-wrapper" style={{ position: 'relative' }}>
+          {/* Mobile Fixed Center Bubble */}
+          <div 
+            className="mobile-fixed-bubble" 
+            style={{ width: `${sliderStyle.width}px` }} 
+          />
+
           <div className="segmented-control-container" ref={containerRef}>
             <div className="segmented-control" style={{ position: 'relative' }}>
               <div 
@@ -260,16 +319,29 @@ const ProjectsShowcase = ({ onModalChange }) => {
                   zIndex: 1
                 }}
               />
-              {categories.map((cat, idx) => (
+              {infiniteCategories.map((cat, idx) => (
                 <button
-                  key={cat}
+                  key={`${cat}-${idx}`}
                   ref={el => tabsRef.current[idx] = el}
-                  onClick={() => setActiveFilter(cat)}
-                  className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
+                  onClick={(e) => {
+                    setActiveFilter(cat);
+                    if (window.innerWidth <= 768) {
+                      const container = containerRef.current;
+                      if (container) {
+                        const containerCenter = container.offsetWidth / 2;
+                        const buttonCenter = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
+                        container.scrollTo({
+                          left: buttonCenter - containerCenter,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }
+                  }}
+                  className={`segment-btn ${activeFilter === cat ? 'active' : ''} ${idx >= categories.length ? 'mobile-only-tab' : ''}`}
                   style={{ 
                     position: 'relative', 
-                    zIndex: 2,
-                    transition: 'color 0.5s ease'
+                    zIndex: activeFilter === cat ? 2 : 0,
+                    transition: 'color 0.8s ease'
                   }}
                 >
                   {cat}
@@ -280,65 +352,69 @@ const ProjectsShowcase = ({ onModalChange }) => {
         </div>
 
         {/* Projects Grid */}
-        <div className="projects-apple-grid">
-          {filteredProjects.map((project) => {
-            return (
-              <div key={project.id} className="project-apple-card glass-card">
-                
-                <div className="card-top-row">
-                  <span className="badge badge-ai">{project.category}</span>
-                  <span className="metric-tag code-font">{project.accuracy}</span>
+        <div className="projects-grid">
+          {filteredProjects.map((project, index) => (
+            <div key={project.id} className="project-card" style={{ animationDelay: `${index * 0.1}s` }}>
+              <div className="project-header">
+                <div className="project-icon">
+                  <project.icon size={20} strokeWidth={2} />
                 </div>
+                <div className="project-badges">
+                  <span className="badge badge-primary">{project.highlightBadge}</span>
+                </div>
+              </div>
 
-                <h3 className="project-apple-title">{project.title}</h3>
-                <p className="project-apple-summary">{project.summary}</p>
-
-                <div className="project-apple-tech">
-                  {project.tech.map((t, idx) => (
-                    <span key={idx} className="tech-pill">{t}</span>
+              <div className="project-content">
+                <span className="project-category">{project.category}</span>
+                <h3>{project.title}</h3>
+                <p className="project-summary">{project.summary}</p>
+                
+                <div className="project-tech-stack">
+                  {project.tech.map((t, i) => (
+                    <span key={i} className="tech-chip">{t}</span>
                   ))}
                 </div>
+              </div>
 
-                <div className="project-apple-footer">
-                  <span className="role-text">{project.role}</span>
-                  <button 
-                    onClick={(e) => {
+              <div className="project-footer">
+                <button 
+                  className="read-more-btn"
+                  onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const deltaX = (rect.left + rect.width / 2) - window.innerWidth / 2;
                       const deltaY = rect.top - window.innerHeight / 2;
                       setModalOrigin({ x: deltaX, y: deltaY });
                       setSelectedProject(project);
                     }}
-                    className="btn btn-secondary btn-sm pill-action"
-                  >
-                    <span>Details</span>
-                    <ArrowUpRight size={14} />
-                  </button>
-                </div>
-
+                >
+                  View Details <ArrowRight size={16} />
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
       </div>
 
       {/* Project Details Modal */}
       {selectedProject && (
-        <div className={`modal-backdrop ${isClosing ? 'closing' : ''}`} onClick={handleClose}>
+        <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={handleClose}>
           <div 
-            className={`modal-content glass-card ${isClosing ? 'closing' : ''}`} 
+            className="modal-content" 
             onClick={(e) => e.stopPropagation()}
-            style={{ transformOrigin: `calc(50% + ${modalOrigin.x}px) calc(50% + ${modalOrigin.y}px)` }}
+            style={{
+              '--origin-x': `${modalOrigin.x}px`,
+              '--origin-y': `${modalOrigin.y}px`
+            }}
           >
-            <button className="modal-close-btn" onClick={handleClose}>
-              <X size={18} />
-            </button>
-
             <div className="modal-header">
-              <span className="badge badge-cyan">{selectedProject.category}</span>
-              <h3 className="modal-title mt-2">{selectedProject.title}</h3>
-              <p className="modal-authors">{selectedProject.role} • {selectedProject.period}</p>
+              <div className="modal-title-group">
+                <span className="modal-category">{selectedProject.category}</span>
+                <h3>{selectedProject.title}</h3>
+              </div>
+              <button onClick={handleClose} className="modal-close-btn">
+                <X size={20} />
+              </button>
             </div>
 
             <div className="modal-body">
@@ -415,69 +491,256 @@ const ProjectsShowcase = ({ onModalChange }) => {
           }
         }
 
-        .projects-apple-grid {
+        .projects-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-          gap: 1.75rem;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 2rem;
         }
 
-        .project-apple-card {
+        .project-card {
+          background: var(--card-bg);
+          border: 1px solid var(--border-glass);
+          border-radius: 24px;
           padding: 2rem;
           display: flex;
           flex-direction: column;
+          gap: 1.5rem;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: fadeUp 0.6s ease forwards;
+          opacity: 0;
+          position: relative;
+          overflow: hidden;
+
+          &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+          }
+
+          &:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 255, 255, 0.8);
+            
+            &::before { opacity: 1; }
+            .read-more-btn { color: var(--accent-apple-blue); }
+            .read-more-btn svg { transform: translateX(4px); }
+          }
         }
 
-        .card-top-row {
+        .project-header, .project-content, .project-footer { position: relative; z-index: 1; }
+
+        .project-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+
+        .project-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 16px;
+          background: rgba(0, 0, 0, 0.03);
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          margin-bottom: 1.25rem;
-        }
-
-        .metric-tag {
-          font-size: 0.78rem;
-          color: var(--accent-apple-blue);
-          font-weight: 600;
-        }
-
-        .project-apple-title {
-          font-size: 1.35rem;
-          line-height: 1.3;
-          margin-bottom: 0.65rem;
+          justify-content: center;
           color: var(--text-main);
         }
 
-        .project-apple-summary {
-          font-size: 0.92rem;
+        .badge {
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 0.35rem 0.8rem;
+          border-radius: 9999px;
+          background: rgba(0, 0, 0, 0.05);
+          color: var(--text-main);
+        }
+
+        .project-category {
+          font-size: 0.8rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
           color: var(--text-muted);
-          line-height: 1.55;
-          margin-bottom: 1.25rem;
-          flex-grow: 1;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+
+        .project-content h3 {
+          font-size: 1.35rem;
+          line-height: 1.3;
+          margin-bottom: 1rem;
+        }
+
+        .project-summary {
+          font-size: 0.95rem;
+          color: var(--text-muted);
+          line-height: 1.6;
+        }
+
+        .project-tech-stack {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 1.5rem;
+        }
+
+        .tech-chip {
+          font-size: 0.75rem;
+          padding: 0.3rem 0.75rem;
+          border-radius: 6px;
+          background: rgba(0, 0, 0, 0.04);
+          color: var(--text-muted);
+          font-weight: 500;
+        }
+
+        .project-footer {
+          margin-top: auto;
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--border-glass);
+        }
+
+        .read-more-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: none;
+          border: none;
+          color: var(--text-main);
+          font-weight: 600;
+          font-size: 0.95rem;
+          cursor: pointer;
+          padding: 0;
+          transition: all 0.3s ease;
+          
+          svg { transition: transform 0.3s ease; }
+        }
+
+        /* Modern iOS Modal */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .modal-overlay.closing {
+          animation: modalFadeOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .modal-content {
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(40px) saturate(200%);
+          -webkit-backdrop-filter: blur(40px) saturate(200%);
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          border-radius: 28px;
+          width: 100%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          transform-origin: var(--origin-x) var(--origin-y);
+          animation: modalZoomIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .modal-overlay.closing .modal-content {
+          animation: modalZoomOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .modal-header {
+          padding: 2rem 2rem 1.5rem;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        .modal-category {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--accent-apple-blue);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+
+        .modal-title-group h3 {
+          font-size: 1.5rem;
+          line-height: 1.3;
+          margin: 0;
+        }
+
+        .modal-close-btn {
+          width: 32px;
+          height: 32px;
+          border-radius: 16px;
+          background: rgba(0, 0, 0, 0.05);
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: var(--text-muted);
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+
+          &:hover { background: rgba(0, 0, 0, 0.1); color: var(--text-main); }
+        }
+
+        .modal-body {
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+        }
+
+        .modal-section h4 {
+          font-size: 1.1rem;
+          margin-bottom: 1rem;
+          color: var(--text-main);
+        }
+
+        .abstract-text {
+          font-size: 1rem;
+          line-height: 1.7;
+          color: var(--text-muted);
         }
 
         .project-apple-tech {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.35rem;
-          margin-bottom: 1.5rem;
+          gap: 0.5rem;
         }
 
-        .project-apple-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-top: 1px solid var(--border-glass);
-          padding-top: 1.25rem;
+        .tech-pill {
+          padding: 0.4rem 1rem;
+          background: var(--bg-main);
+          border: 1px solid var(--border-glass);
+          border-radius: 9999px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: var(--text-main);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .role-text {
-          font-size: 0.78rem;
-          color: var(--text-muted);
-        }
-
-        .pill-action {
-          padding: 0.4rem 0.9rem;
-          font-size: 0.8rem;
+        .modal-footer {
+          padding: 1.5rem 2rem 2rem;
+          border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .modal-bullet-list {
@@ -488,6 +751,16 @@ const ProjectsShowcase = ({ onModalChange }) => {
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
 
+        .mobile-fixed-bubble {
+          display: none;
+        }
+
+        @media (min-width: 769px) {
+          .mobile-only-tab {
+            display: none !important;
+          }
+        }
+
         @media (max-width: 768px) {
           .segmented-control-container {
             justify-content: flex-start;
@@ -496,9 +769,13 @@ const ProjectsShowcase = ({ onModalChange }) => {
             /* Allow scrolling edge-to-edge on iPhone */
             margin-left: -5%;
             margin-right: -5%;
-            padding-left: 5%;
-            padding-right: 5%;
-            padding-bottom: 0.5rem;
+            /* Add enough padding so first and last items can reach the center */
+            padding-left: calc(50vw - 40px);
+            padding-right: calc(50vw - 40px);
+            padding-bottom: 1rem;
+            scroll-snap-type: x mandatory;
+            position: relative;
+            z-index: 2; /* Forces text to render completely ON TOP of the fixed bubble so it isn't blurred! */
           }
           
           .segmented-control-container::-webkit-scrollbar {
@@ -508,6 +785,35 @@ const ProjectsShowcase = ({ onModalChange }) => {
           .segmented-control {
             flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
             white-space: nowrap;
+            background: transparent !important; /* Removes track background */
+            border: none !important;
+          }
+
+          .segment-btn {
+            scroll-snap-align: center;
+          }
+
+          .desktop-slider-bubble {
+            display: none; /* Hide desktop sliding bubble */
+          }
+
+          .mobile-fixed-bubble {
+            display: block;
+            position: absolute;
+            top: 4px;
+            height: calc(100% - 24px); /* Account for padding-bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            /* Copy the beautiful glass style */
+            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(30px) saturate(250%);
+            -webkit-backdrop-filter: blur(30px) saturate(250%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2);
+            border-radius: 9999px;
+            pointer-events: none;
+            transition: width 0.3s ease;
+            z-index: 1; /* Sits UNDER the text container */
           }
         }
       `}</style>
