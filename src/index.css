@@ -241,6 +241,10 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(40px) saturate(200%);
 }
 
+.w-full {
+  width: 100%;
+}
+
 .btn-primary {
   background: rgba(20, 20, 22, 0.6);
   color: #ffffff;

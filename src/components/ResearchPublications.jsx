@@ -400,9 +400,11 @@ const ResearchPublications = ({ onModalChange }) => {
         }
 
         .btn-sm {
-          padding: 0.5rem 1rem;
-          font-size: 0.82rem;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.8rem;
           flex: 1;
+          white-space: nowrap;
+          justify-content: center;
         }
 
         /* Modal */
