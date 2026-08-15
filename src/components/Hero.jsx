@@ -101,8 +101,8 @@ const Hero = ({ onOpenResume }) => {
           position: absolute;
           inset: 0;
           overflow: hidden; 
-          filter: blur(30px); /* Massive blur blends the blobs perfectly */
-          transform: scale(1.15); /* Prevents blur bleeding at the edges */
+          /* No more expensive CSS blurs! We use radial gradients instead */
+          transform: scale(1.15); /* Prevents edge bleeding */
           z-index: 1;
         }
 
@@ -110,35 +110,34 @@ const Hero = ({ onOpenResume }) => {
         .mesh-blob {
           position: absolute;
           border-radius: 50%;
-          filter: blur(20px);
           will-change: transform;
         }
 
         .mesh-blob-1 {
           top: -30%; left: -10%;
           width: 70%; height: 130%;
-          background: rgba(37, 99, 235, 0.9); /* Sapphire */
+          background: radial-gradient(circle at center, rgba(37, 99, 235, 1) 0%, rgba(37, 99, 235, 0) 70%);
           animation: meshSway1 6s infinite alternate ease-in-out;
         }
 
         .mesh-blob-2 {
           bottom: -40%; right: -10%;
           width: 80%; height: 110%;
-          background: rgba(6, 182, 212, 0.9); /* Cyber Cyan */
+          background: radial-gradient(circle at center, rgba(6, 182, 212, 1) 0%, rgba(6, 182, 212, 0) 70%);
           animation: meshSway2 8s infinite alternate ease-in-out;
         }
 
         .mesh-blob-3 {
           top: 20%; left: 30%;
           width: 60%; height: 110%;
-          background: rgba(16, 185, 129, 0.8); /* Emerald Green */
+          background: radial-gradient(circle at center, rgba(16, 185, 129, 0.9) 0%, rgba(16, 185, 129, 0) 70%);
           animation: meshSway3 7s infinite alternate ease-in-out;
         }
         
         .mesh-blob-4 {
           top: -20%; right: 20%;
           width: 70%; height: 100%;
-          background: rgba(79, 70, 229, 0.9); /* Indigo */
+          background: radial-gradient(circle at center, rgba(79, 70, 229, 1) 0%, rgba(79, 70, 229, 0) 70%);
           animation: meshSway4 9s infinite alternate ease-in-out;
         }
 
@@ -257,14 +256,6 @@ const Hero = ({ onOpenResume }) => {
           }
           .hero-apple-actions {
             justify-content: center;
-          }
-          /* MASSIVE PERFORMANCE FIX FOR MOBILE */
-          .hero-card-top-bg {
-            background: linear-gradient(135deg, rgba(37,99,235,0.9), rgba(16,185,129,0.9));
-            filter: none !important; /* Remove huge blur */
-          }
-          .mesh-blob {
-            display: none !important; /* Completely delete from rendering engine */
           }
         }
       `}</style>
