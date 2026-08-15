@@ -18,6 +18,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
   const tabsRef = React.useRef([]);
   const containerRef = React.useRef(null);
   const scrollTimeoutRef = React.useRef(null);
+  const scrollInitRef = React.useRef(false);
   
   const handleClose = () => {
     setIsClosing(true);
@@ -28,6 +29,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
   };
 
   const categories = ['All', 'Clinical AI', 'Few-Shot Learning', 'Generative AI', 'Blockchain', 'Systems & Networks', 'Computer Vision'];
+  // Create an infinite array for the mobile picker wheel
+  const infiniteCategories = [...categories, ...categories, ...categories];
 
   React.useEffect(() => {
     if (onModalChange) {
@@ -36,9 +39,10 @@ const ProjectsShowcase = ({ onModalChange }) => {
   }, [selectedProject, onModalChange]);
 
   React.useEffect(() => {
+    // On desktop, only track the original categories
     const activeIndex = categories.indexOf(activeFilter);
     const activeTab = tabsRef.current[activeIndex];
-    if (activeTab) {
+    if (activeTab && window.innerWidth > 768) {
       setSliderStyle({
         left: activeTab.offsetLeft,
         width: activeTab.offsetWidth,
@@ -47,19 +51,31 @@ const ProjectsShowcase = ({ onModalChange }) => {
     }
   }, [activeFilter, categories]);
 
-  // Mobile scroll tracking for Picker Wheel effect
+  // Mobile scroll tracking for Infinite Picker Wheel effect
   React.useEffect(() => {
     if (window.innerWidth > 768) return;
 
     const container = containerRef.current;
     if (!container) return;
 
+    // Center the initial view on the MIDDLE copy of the items (index 7 to 13)
+    if (!scrollInitRef.current) {
+      const middleIdx = categories.length; // 'All' in the middle array
+      const targetBtn = tabsRef.current[middleIdx];
+      if (targetBtn) {
+        const containerCenter = container.offsetWidth / 2;
+        const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
+        container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
+        scrollInitRef.current = true;
+      }
+    }
+
     const handleScroll = () => {
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
       
       scrollTimeoutRef.current = setTimeout(() => {
         const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
-        let closestCat = null;
+        let closestIdx = -1;
         let minDistance = Infinity;
 
         tabsRef.current.forEach((el, idx) => {
@@ -69,19 +85,34 @@ const ProjectsShowcase = ({ onModalChange }) => {
           const distance = Math.abs(containerCenter - elCenter);
           if (distance < minDistance) {
             minDistance = distance;
-            closestCat = categories[idx];
+            closestIdx = idx;
           }
         });
 
-        if (closestCat && closestCat !== activeFilter) {
-          setActiveFilter(closestCat);
+        if (closestIdx !== -1) {
+          const cat = infiniteCategories[closestIdx];
+          
+          setActiveFilter(prev => {
+            if (prev !== cat) return cat;
+            return prev;
+          });
+
+          // INFINITE LOOP JUMP: If user scrolls into the first or third array clone, seamlessly jump back to the middle array!
+          if (closestIdx < categories.length || closestIdx >= categories.length * 2) {
+            const middleIdx = (closestIdx % categories.length) + categories.length;
+            const targetBtn = tabsRef.current[middleIdx];
+            if (targetBtn) {
+              const bCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
+              container.scrollTo({ left: bCenter - container.offsetWidth / 2, behavior: 'auto' });
+            }
+          }
         }
       }, 50); // Debounce
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
-  }, [activeFilter, categories]);
+  }, []); // Run once to attach listener
 
   const projects = [
     {
@@ -284,9 +315,9 @@ const ProjectsShowcase = ({ onModalChange }) => {
                   zIndex: 1
                 }}
               />
-              {categories.map((cat, idx) => (
+              {infiniteCategories.map((cat, idx) => (
                 <button
-                  key={cat}
+                  key={`${cat}-${idx}`}
                   ref={el => tabsRef.current[idx] = el}
                   onClick={(e) => {
                     setActiveFilter(cat);
@@ -302,7 +333,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
                       }
                     }
                   }}
-                  className={`segment-btn ${activeFilter === cat ? 'active' : ''}`}
+                  className={`segment-btn ${activeFilter === cat ? 'active' : ''} ${idx >= categories.length ? 'mobile-only-tab' : ''}`}
                   style={{ 
                     position: 'relative', 
                     zIndex: activeFilter === cat ? 2 : 0,
@@ -529,6 +560,12 @@ const ProjectsShowcase = ({ onModalChange }) => {
           display: none;
         }
 
+        @media (min-width: 769px) {
+          .mobile-only-tab {
+            display: none !important;
+          }
+        }
+
         @media (max-width: 768px) {
           .segmented-control-container {
             justify-content: flex-start;
@@ -542,6 +579,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
             padding-right: calc(50vw - 40px);
             padding-bottom: 1rem;
             scroll-snap-type: x mandatory;
+            position: relative;
+            z-index: 2; /* Forces text to render completely ON TOP of the fixed bubble so it isn't blurred! */
           }
           
           .segmented-control-container::-webkit-scrollbar {
@@ -551,6 +590,8 @@ const ProjectsShowcase = ({ onModalChange }) => {
           .segmented-control {
             flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
             white-space: nowrap;
+            background: transparent !important; /* Removes track background so bubble is visible */
+            border: none !important;
           }
 
           .segment-btn {
@@ -577,7 +618,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
             border-radius: 9999px;
             pointer-events: none;
             transition: width 0.3s ease;
-            z-index: 1;
+            z-index: 1; /* Sits UNDER the text container (z-index 2) */
           }
         }
       `}</style>
