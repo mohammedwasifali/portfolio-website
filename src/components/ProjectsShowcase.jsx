@@ -62,17 +62,20 @@ const ProjectsShowcase = ({ onModalChange }) => {
 
     // Center the initial view on the exact middle of the massive array
     if (!scrollInitRef.current) {
-      const middleCopyIdx = Math.floor(infiniteCategories.length / 2);
-      // Ensure we start at the 'All' category of that copy (index % 7 == 0)
-      const startIdx = middleCopyIdx - (middleCopyIdx % categories.length); 
-      const targetBtn = tabsRef.current[startIdx];
-      
-      if (targetBtn) {
-        const containerCenter = container.offsetWidth / 2;
-        const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
-        container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
-        scrollInitRef.current = true;
-      }
+      // Delay slightly to ensure DOM is fully painted so offsetLeft is correct
+      setTimeout(() => {
+        const middleCopyIdx = Math.floor(infiniteCategories.length / 2);
+        // Ensure we start at the 'All' category of that copy (index % 7 == 0)
+        const startIdx = middleCopyIdx - (middleCopyIdx % categories.length); 
+        const targetBtn = tabsRef.current[startIdx];
+        
+        if (targetBtn) {
+          const containerCenter = container.offsetWidth / 2;
+          const buttonCenter = targetBtn.offsetLeft + targetBtn.offsetWidth / 2;
+          container.scrollTo({ left: buttonCenter - containerCenter, behavior: 'auto' });
+          scrollInitRef.current = true;
+        }
+      }, 100);
     }
 
     const handleScroll = () => {
@@ -297,9 +300,9 @@ const ProjectsShowcase = ({ onModalChange }) => {
 
         {/* iOS-Style Segmented Control Filter Bar */}
         <div className="segmented-wrapper" style={{ position: 'relative' }}>
-          {/* Mobile Fixed Center Bubble */}
+          {/* Mobile Fixed Center Line */}
           <div 
-            className="mobile-fixed-bubble" 
+            className="mobile-fixed-line" 
             style={{ width: `${sliderStyle.width}px` }} 
           />
 
@@ -565,7 +568,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
 
-        .mobile-fixed-bubble {
+        .mobile-fixed-line {
           display: none;
         }
 
@@ -589,7 +592,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
             padding-bottom: 1rem;
             scroll-snap-type: x mandatory;
             position: relative;
-            z-index: 2; /* Forces text to render completely ON TOP of the fixed bubble so it isn't blurred! */
+            z-index: 2; /* Forces text to render completely ON TOP of the fixed line */
           }
           
           .segmented-control-container::-webkit-scrollbar {
@@ -599,7 +602,7 @@ const ProjectsShowcase = ({ onModalChange }) => {
           .segmented-control {
             flex-wrap: nowrap; /* Prevents wrapping which breaks the slider bubble */
             white-space: nowrap;
-            background: transparent !important; /* Removes track background so bubble is visible */
+            background: transparent !important; /* Removes track background */
             border: none !important;
           }
 
@@ -611,23 +614,20 @@ const ProjectsShowcase = ({ onModalChange }) => {
             display: none; /* Hide desktop sliding bubble */
           }
 
-          .mobile-fixed-bubble {
+          .mobile-fixed-line {
             display: block;
             position: absolute;
-            top: 4px;
-            height: calc(100% - 24px); /* Account for padding-bottom */
+            bottom: 4px; /* Sits right below the text */
+            height: 4px;
             left: 50%;
             transform: translateX(-50%);
-            /* Copy the beautiful glass style */
-            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%);
-            backdrop-filter: blur(30px) saturate(250%);
-            -webkit-backdrop-filter: blur(30px) saturate(250%);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2);
+            /* Sleek glowing Apple-style slider indicator */
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6); /* Sapphire to Indigo */
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
             border-radius: 9999px;
             pointer-events: none;
             transition: width 0.3s ease;
-            z-index: 1; /* Sits UNDER the text container (z-index 2) */
+            z-index: 1; /* Sits UNDER the text container */
           }
         }
       `}</style>
