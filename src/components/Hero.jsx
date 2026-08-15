@@ -229,33 +229,58 @@ const Hero = ({ onOpenResume }) => {
           box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
+        /* Smooth fade from dark top to white bottom */
+        .hero-card-top::after {
+          content: '';
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          height: 40px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0), var(--bg-card));
+          z-index: 5;
+        }
+
         @media (max-width: 768px) {
           .hero-apple-section {
-            padding-top: 6rem; /* Ensure space for navbar */
+            padding-top: 3rem; /* Push the whole card much higher */
+            padding-bottom: 1rem;
           }
           .hero-apple-container {
-            width: 90%; /* Much better margins on mobile */
+            width: 92%; 
+          }
+          .hero-intro-card {
+            margin-bottom: 1rem;
+            border-radius: 20px;
           }
           .hero-card-top {
-            height: 180px; /* Reduce top height */
+            height: 120px; /* Much shorter top section */
           }
           .hero-photo-wrapper {
-            width: 150px; /* Smaller photo */
-            height: 150px;
-            bottom: -75px;
+            width: 110px; /* Smaller photo to save space */
+            height: 110px;
+            bottom: -50px;
             left: 50%;
             transform: translateX(-50%);
           }
           .hero-card-bottom {
-            padding: 5rem 1.5rem 2rem 1.5rem;
+            padding: 3.5rem 1.2rem 1.5rem 1.2rem; /* Reduce massive vertical padding */
             text-align: center;
           }
           .hero-apple-title {
-            font-size: 2.2rem;
-            margin-top: 0.5rem;
+            font-size: 1.8rem; /* Fit name on one line if possible */
+            margin-top: 0;
+          }
+          .hero-apple-subtitle {
+            font-size: 0.9rem; /* Smaller text to fit all description */
+            line-height: 1.4;
           }
           .hero-apple-actions {
+            margin-top: 1rem;
+            gap: 0.5rem;
             justify-content: center;
+          }
+          .hero-apple-actions .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
           }
         }
       `}</style>
