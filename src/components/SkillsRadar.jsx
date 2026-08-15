@@ -5,6 +5,7 @@ const SkillsRadar = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const tabsRef = React.useRef([]);
+  const containerRef = React.useRef(null);
 
   const categories = ['All', 'ML & Deep Learning', 'Languages & Core CS', 'Data & Analytics', 'Systems & Infrastructure'];
 
@@ -17,6 +18,19 @@ const SkillsRadar = () => {
         width: activeTab.offsetWidth,
         opacity: 1
       });
+
+      if (window.innerWidth <= 768 && containerRef.current) {
+        const container = containerRef.current;
+        const containerCenter = container.offsetWidth / 2;
+        const buttonCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
+        
+        setTimeout(() => {
+          container.scrollTo({
+            left: buttonCenter - containerCenter,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
     }
   }, [selectedCategory, categories]);
 
@@ -61,51 +75,45 @@ const SkillsRadar = () => {
         </div>
 
         {/* iOS Segmented Control */}
-        <div className="segmented-control-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
-          <div className="segmented-control" style={{ 
-            display: 'inline-flex', background: 'rgba(0,0,0,0.05)', padding: '4px', 
-            borderRadius: '9999px', flexWrap: 'wrap', justifyContent: 'center', gap: '2px', position: 'relative'
-          }}>
-            <div 
-              style={{
-                position: 'absolute',
-                top: '4px',
-                height: 'calc(100% - 8px)',
-                left: `${sliderStyle.left}px`,
-                width: `${sliderStyle.width}px`,
-                opacity: sliderStyle.opacity,
-                transition: 'all 1.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                borderRadius: '9999px',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)',
-                backdropFilter: 'blur(30px) saturate(250%)',
-                WebkitBackdropFilter: 'blur(30px) saturate(250%)',
-                border: '1px solid rgba(255, 255, 255, 0.6)',
-                boxShadow: 'inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2)',
-                zIndex: 1
-              }}
-            />
-            {categories.map((cat, idx) => (
-              <button
-                key={cat}
-                ref={el => tabsRef.current[idx] = el}
-                onClick={() => setSelectedCategory(cat)}
+        <div className="segmented-wrapper">
+          <div className="segmented-control-container" ref={containerRef}>
+            <div className="segmented-control" style={{ position: 'relative' }}>
+              <div 
+                className="desktop-slider-bubble"
                 style={{
-                  padding: '0.6rem 1.2rem',
+                  position: 'absolute',
+                  top: '4px',
+                  height: 'calc(100% - 8px)',
+                  left: `${sliderStyle.left}px`,
+                  width: `${sliderStyle.width}px`,
+                  opacity: sliderStyle.opacity,
+                  transition: 'all 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
                   borderRadius: '9999px',
-                  border: 'none',
-                  background: 'transparent',
-                  color: selectedCategory === cat ? '#1d1d1f' : '#6e6e73',
-                  fontWeight: selectedCategory === cat ? '600' : '500',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.8s ease',
-                  position: 'relative',
-                  zIndex: selectedCategory === cat ? 2 : 0
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 100%)',
+                  backdropFilter: 'blur(30px) saturate(250%)',
+                  WebkitBackdropFilter: 'blur(30px) saturate(250%)',
+                  border: '1px solid rgba(255, 255, 255, 0.6)',
+                  boxShadow: 'inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.1), 0 15px 30px rgba(0,0,0,0.2)',
+                  pointerEvents: 'none',
+                  zIndex: 1
                 }}
-              >
-                {cat}
-              </button>
-            ))}
+              />
+              {categories.map((cat, idx) => (
+                <button
+                  key={cat}
+                  ref={el => tabsRef.current[idx] = el}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`segment-btn ${selectedCategory === cat ? 'active' : ''}`}
+                  style={{ 
+                    position: 'relative', 
+                    zIndex: 2,
+                    transition: 'color 0.5s ease'
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -140,6 +148,42 @@ const SkillsRadar = () => {
       </div>
 
       <style>{`
+        .segmented-control-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 3.5rem;
+        }
+
+        .segmented-control {
+          display: inline-flex;
+          background: rgba(0, 0, 0, 0.05);
+          padding: 4px;
+          border-radius: 9999px;
+          border: 1px solid var(--border-glass);
+          gap: 2px;
+          flex-wrap: wrap;
+        }
+
+        .segment-btn {
+          padding: 0.5rem 1.15rem;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          color: var(--text-muted);
+          font-family: var(--font-apple);
+          font-size: 0.85rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover { color: var(--text-main); }
+
+          &.active {
+            color: #1d1d1f;
+            font-weight: 600;
+          }
+        }
+
         .skills-apple-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -211,6 +255,28 @@ const SkillsRadar = () => {
         @media (max-width: 900px) {
           .skills-apple-grid { grid-template-columns: 1fr; }
           .skill-apple-card { padding: 1.75rem; }
+        }
+
+        @media (max-width: 768px) {
+          .segmented-control-container {
+            justify-content: flex-start;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-left: -5%;
+            margin-right: -5%;
+            padding-left: 5%;
+            padding-right: 5%;
+            padding-bottom: 0.5rem;
+          }
+          
+          .segmented-control-container::-webkit-scrollbar {
+            display: none;
+          }
+
+          .segmented-control {
+            flex-wrap: nowrap;
+            white-space: nowrap;
+          }
         }
       `}</style>
     </section>
