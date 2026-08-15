@@ -752,6 +752,11 @@ const ProjectsShowcase = ({ onModalChange }) => {
           li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         }
 
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         .mobile-fixed-bubble {
           display: none;
         }
